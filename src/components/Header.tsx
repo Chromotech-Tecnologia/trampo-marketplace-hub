@@ -1,16 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Building, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { data: profile } = useProfile();
+  const navigate = useNavigate();
+
+  const handleDashboardClick = () => {
+    if (profile?.user_type === 'client') {
+      navigate('/cliente');
+    } else if (profile?.user_type === 'provider') {
+      navigate('/fornecedor');
+    }
+  };
 
   return (
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="bg-gradient-hero p-2 rounded-lg">
               <Building className="h-6 w-6 text-white" />
             </div>
@@ -38,17 +52,28 @@ const Header = () => {
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="outline" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Área do Cliente
-            </Button>
-            <Button variant="gradient" className="flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Sou Fornecedor
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Shield className="h-4 w-4" />
-            </Button>
+            {user ? (
+              <>
+                <Button variant="outline" className="flex items-center gap-2" onClick={handleDashboardClick}>
+                  <User className="h-4 w-4" />
+                  Minha Área
+                </Button>
+                <Button variant="ghost" onClick={signOut}>
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
+                  <User className="h-4 w-4" />
+                  Entrar
+                </Button>
+                <Button variant="gradient" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
+                  <Building className="h-4 w-4" />
+                  Cadastrar
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -60,7 +85,7 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+          {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 pt-4 border-t border-border animate-fade-in">
             <nav className="flex flex-col space-y-4">
@@ -77,14 +102,28 @@ const Header = () => {
                 Contato
               </a>
               <div className="flex flex-col space-y-3 pt-4">
-                <Button variant="outline" className="flex items-center gap-2 justify-center">
-                  <User className="h-4 w-4" />
-                  Área do Cliente
-                </Button>
-                <Button variant="gradient" className="flex items-center gap-2 justify-center">
-                  <Building className="h-4 w-4" />
-                  Sou Fornecedor
-                </Button>
+                {user ? (
+                  <>
+                    <Button variant="outline" className="flex items-center gap-2 justify-center" onClick={handleDashboardClick}>
+                      <User className="h-4 w-4" />
+                      Minha Área
+                    </Button>
+                    <Button variant="ghost" onClick={signOut}>
+                      Sair
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="flex items-center gap-2 justify-center" onClick={() => navigate('/auth')}>
+                      <User className="h-4 w-4" />
+                      Entrar
+                    </Button>
+                    <Button variant="gradient" className="flex items-center gap-2 justify-center" onClick={() => navigate('/auth')}>
+                      <Building className="h-4 w-4" />
+                      Cadastrar
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>

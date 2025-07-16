@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ServiceRequestForm = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ const ServiceRequestForm = () => {
     description: ""
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const categories = [
     "Encanador",
@@ -36,29 +40,22 @@ const ServiceRequestForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Validação básica
-    if (!formData.name || !formData.phone || !formData.city || !formData.category || !formData.description) {
+    
+    if (!user) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
+        title: "Faça login para continuar",
+        description: "Você precisa estar logado para enviar uma solicitação.",
+        action: (
+          <Button variant="outline" onClick={() => navigate('/auth')}>
+            Fazer Login
+          </Button>
+        ),
       });
       return;
     }
 
-    toast({
-      title: "Solicitação enviada!",
-      description: "Em breve você receberá propostas de profissionais qualificados.",
-    });
-    
-    // Reset form
-    setFormData({
-      name: "",
-      phone: "",
-      city: "",
-      category: "",
-      description: ""
-    });
+    // Redirect authenticated users to create a proper service request
+    navigate('/nova-solicitacao');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -89,93 +86,105 @@ const ServiceRequestForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Nome */}
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="Seu nome completo"
-                    required
-                  />
+              {user ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-6">
+                    Você está logado! Agora pode criar uma solicitação completa com todas as funcionalidades.
+                  </p>
+                  <Button onClick={() => navigate('/nova-solicitacao')} size="lg" variant="gradient">
+                    <Send className="mr-2 h-5 w-5" />
+                    Criar Solicitação Completa
+                  </Button>
                 </div>
-
-                {/* Telefone */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone/WhatsApp *</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="(11) 99999-9999"
-                    required
-                  />
-                </div>
-
-                {/* Cidade */}
-                <div className="space-y-2">
-                  <Label htmlFor="city">Cidade *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
-                    placeholder="Sua cidade"
-                    required
-                  />
-                </div>
-
-                {/* Categoria */}
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoria do Serviço *</Label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Descrição */}
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrição do Serviço *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                    placeholder="Descreva detalhadamente o que você precisa..."
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                {/* Upload de arquivos */}
-                <div className="space-y-2">
-                  <Label>Anexar Imagens/Documentos (opcional)</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Clique ou arraste arquivos aqui
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, PDF até 10MB
-                    </p>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Nome */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome Completo *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      placeholder="Seu nome completo"
+                      required
+                    />
                   </div>
-                </div>
 
-                {/* Submit Button */}
-                <Button type="submit" size="lg" variant="gradient" className="w-full">
-                  <Send className="mr-2 h-5 w-5" />
-                  Enviar Solicitação
-                </Button>
-              </form>
+                  {/* Telefone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Telefone/WhatsApp *</Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      placeholder="(11) 99999-9999"
+                      required
+                    />
+                  </div>
+
+                  {/* Cidade */}
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Cidade *</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => handleInputChange("city", e.target.value)}
+                      placeholder="Sua cidade"
+                      required
+                    />
+                  </div>
+
+                  {/* Categoria */}
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categoria do Serviço *</Label>
+                    <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Descrição */}
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descrição do Serviço *</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange("description", e.target.value)}
+                      placeholder="Descreva detalhadamente o que você precisa..."
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  {/* Upload de arquivos */}
+                  <div className="space-y-2">
+                    <Label>Anexar Imagens/Documentos (opcional)</Label>
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Clique ou arraste arquivos aqui
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PNG, JPG, PDF até 10MB
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button type="submit" size="lg" variant="gradient" className="w-full">
+                    <Send className="mr-2 h-5 w-5" />
+                    Continuar (Login Necessário)
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>
