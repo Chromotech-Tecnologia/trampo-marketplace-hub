@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Edit, Trash2, Eye, Search, Calendar, MapPin, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import type { Database } from '@/integrations/supabase/types';
 
 interface ServiceRequestListProps {
   onEdit?: (id: string) => void;
@@ -23,7 +24,7 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
 
   const { requests, isLoading, deleteRequest, updateStatus } = useServiceRequests({
     search,
-    status: statusFilter || undefined,
+    status: (statusFilter || undefined) as Database['public']['Enums']['service_request_status'] | undefined,
     category_id: categoryFilter || undefined,
   });
 
@@ -240,7 +241,7 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => updateStatus({ id: request.id, status: 'paused' })}
+                        onClick={() => updateStatus({ id: request.id, status: 'paused' as Database['public']['Enums']['service_request_status'] })}
                       >
                         Pausar
                       </Button>
@@ -250,7 +251,7 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => updateStatus({ id: request.id, status: 'active' })}
+                        onClick={() => updateStatus({ id: request.id, status: 'active' as Database['public']['Enums']['service_request_status'] })}
                       >
                         Reativar
                       </Button>

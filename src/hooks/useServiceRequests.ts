@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Database } from '@/integrations/supabase/types';
 
 interface ServiceRequestFilters {
-  status?: string;
+  status?: Database['public']['Enums']['service_request_status'];
   category_id?: string;
   search?: string;
 }
@@ -159,7 +160,7 @@ export const useServiceRequests = (filters: ServiceRequestFilters = {}) => {
 
   // Update status
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: Database['public']['Enums']['service_request_status'] }) => {
       const { data, error } = await supabase
         .from('service_requests')
         .update({ status })

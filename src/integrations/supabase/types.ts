@@ -379,6 +379,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      unlock_lead: {
+        Args: {
+          p_provider_id: string
+          p_service_request_id: string
+          p_credits_used?: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       credit_transaction_type: "purchase" | "use" | "refund" | "bonus"
