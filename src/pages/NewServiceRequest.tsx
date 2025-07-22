@@ -11,21 +11,22 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import { useServiceRequests, type ServiceRequestForm } from '@/hooks/useServiceRequests';
 
 const NewServiceRequest = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { createRequest, isCreating } = useServiceRequests();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ServiceRequestForm>({
     title: '',
     description: '',
     category_id: '',
     city: '',
     state: '',
-    budget_min: '',
-    budget_max: '',
+    budget_min: undefined,
+    budget_max: undefined,
     urgency: '',
     contact_phone: '',
     contact_email: '',
@@ -67,48 +68,14 @@ const NewServiceRequest = () => {
       return;
     }
 
-    setLoading(true);
+    // Use the hook to create the request
+    createRequest({
+      ...formData,
+      contact_email: formData.contact_email || user.email || '',
+    });
 
-    try {
-      // Set expiration date to 30 days from now
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
-
-      const { error } = await supabase
-        .from('service_requests')
-        .insert({
-          client_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          category_id: formData.category_id,
-          city: formData.city,
-          state: formData.state,
-          budget_min: formData.budget_min ? parseInt(formData.budget_min) : null,
-          budget_max: formData.budget_max ? parseInt(formData.budget_max) : null,
-          urgency: formData.urgency || null,
-          contact_phone: formData.contact_phone || null,
-          contact_email: formData.contact_email || user.email,
-          expires_at: expiresAt.toISOString(),
-          status: 'active',
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Solicitação criada com sucesso!",
-        description: "Fornecedores qualificados poderão ver sua solicitação.",
-      });
-
-      navigate('/cliente');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao criar solicitação",
-        description: error.message || "Tente novamente em alguns instantes.",
-      });
-    }
-
-    setLoading(false);
+    // Navigate on success (handled by the hook's onSuccess callback)
+    navigate('/cliente');
   };
 
   return (
@@ -227,8 +194,8 @@ const NewServiceRequest = () => {
                     id="budget_min"
                     type="number"
                     placeholder="1000"
-                    value={formData.budget_min}
-                    onChange={(e) => setFormData({ ...formData, budget_min: e.target.value })}
+                    value={formData.budget_min || ''}
+                    onChange={(e) => setFormData({ ...formData, budget_min: e.target.value ? parseInt(e.target.value) : undefined })}
                   />
                 </div>
 
@@ -238,8 +205,8 @@ const NewServiceRequest = () => {
                     id="budget_max"
                     type="number"
                     placeholder="5000"
-                    value={formData.budget_max}
-                    onChange={(e) => setFormData({ ...formData, budget_max: e.target.value })}
+                    value={formData.budget_max || ''}
+                    onChange={(e) => setFormData({ ...formData, budget_max: e.target.value ? parseInt(e.target.value) : undefined })}
                   />
                 </div>
 
@@ -274,8 +241,8 @@ const NewServiceRequest = () => {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={isCreating}>
+                  {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Criar Solicitação
                 </Button>
               </div>

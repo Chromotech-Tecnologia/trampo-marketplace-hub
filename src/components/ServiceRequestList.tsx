@@ -11,6 +11,7 @@ import { Edit, Trash2, Eye, Search, Calendar, MapPin, DollarSign } from 'lucide-
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Database } from '@/integrations/supabase/types';
+import { EditServiceRequestDialog } from './EditServiceRequestDialog';
 
 interface ServiceRequestListProps {
   onEdit?: (id: string) => void;
@@ -21,6 +22,8 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [editingRequest, setEditingRequest] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { requests, isLoading, deleteRequest, updateStatus } = useServiceRequests({
     search,
@@ -227,11 +230,15 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
                       </Button>
                     )}
                     
-                    {onEdit && request.status === 'active' && (
+                    {request.status === 'active' && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onEdit(request.id)}
+                        onClick={() => {
+                          setEditingRequest(request);
+                          setIsEditDialogOpen(true);
+                          onEdit?.(request.id);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -278,6 +285,12 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
           ))
         )}
       </div>
+
+      <EditServiceRequestDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        request={editingRequest}
+      />
     </div>
   );
 };
