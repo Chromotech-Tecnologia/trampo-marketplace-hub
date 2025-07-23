@@ -93,6 +93,7 @@ export const useServiceRequests = (filters: ServiceRequestFilters = {}) => {
       });
     },
     onError: (error) => {
+      console.error('Error creating service request:', error);
       toast({
         title: "Erro ao criar solicitação",
         description: error.message,

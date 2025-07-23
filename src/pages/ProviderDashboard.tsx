@@ -1,13 +1,16 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Eye, CheckCircle, TrendingUp } from 'lucide-react';
+import { LeadsList } from '@/components/LeadsList';
 
 const ProviderDashboard = () => {
   const { signOut } = useAuth();
   const { data: profile } = useProfile();
+  const { credits } = useCredits();
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,7 +36,7 @@ const ProviderDashboard = () => {
               <Coins className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{credits?.balance || 0}</div>
               <p className="text-xs text-muted-foreground">Para desbloquear leads</p>
             </CardContent>
           </Card>
@@ -72,29 +75,8 @@ const ProviderDashboard = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Leads Disponíveis</CardTitle>
-              <CardDescription>
-                Novos leads que correspondem ao seu perfil de serviços
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Eye className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum lead disponível</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  No momento não há leads disponíveis na sua área de atuação.
-                </p>
-                <div className="mt-6">
-                  <Button variant="outline">
-                    Atualizar Áreas de Atuação
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="space-y-6">
+          <LeadsList />
 
           <Card>
             <CardHeader>

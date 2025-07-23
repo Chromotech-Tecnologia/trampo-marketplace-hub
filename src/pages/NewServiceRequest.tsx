@@ -68,14 +68,21 @@ const NewServiceRequest = () => {
       return;
     }
 
-    // Use the hook to create the request
-    createRequest({
-      ...formData,
-      contact_email: formData.contact_email || user.email || '',
-    });
-
-    // Navigate on success (handled by the hook's onSuccess callback)
-    navigate('/cliente');
+    try {
+      await createRequest({
+        ...formData,
+        contact_email: formData.contact_email || user.email || '',
+      });
+      
+      // Navigate after successful creation
+      navigate('/cliente');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao criar solicitação. Tente novamente.",
+      });
+    }
   };
 
   return (
