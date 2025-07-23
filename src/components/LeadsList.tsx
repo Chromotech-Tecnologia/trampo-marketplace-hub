@@ -11,44 +11,16 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCredits } from '@/hooks/useCredits';
 import { useToast } from '@/hooks/use-toast';
+import { useLeads } from '@/hooks/useLeads';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const LeadsList = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const { user } = useAuth();
   const { credits, spendCredits, isSpending } = useCredits();
   const { toast } = useToast();
-
-  // Fetch available leads (active service requests)
-  const { data: leads, isLoading, refetch } = useQuery({
-    queryKey: ['available_leads', search, categoryFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from('service_requests')
-        .select(`
-          *,
-          service_categories (
-            id,
-            name
-          )
-        `)
-        .eq('status', 'active')
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false });
-
-      if (categoryFilter) {
-        query = query.eq('category_id', categoryFilter);
-      }
-
-      if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,city.ilike.%${search}%`);
-      }
-
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const { leads, isLoading, refetch } = useLeads();
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
@@ -65,19 +37,17 @@ export const LeadsList = () => {
     },
   });
 
-  // Fetch unlocked leads for current user
-  const { data: unlockedLeads } = useQuery({
-    queryKey: ['unlocked_leads'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lead_unlocks')
-        .select('service_request_id')
-        .order('unlocked_at', { ascending: false });
-      
-      if (error) throw error;
-      return data?.map(unlock => unlock.service_request_id) || [];
-    },
-  });
+  // Filter leads based on search and category
+  const filteredLeads = leads?.filter((lead) => {
+    const matchesSearch = !search || 
+      lead.title.toLowerCase().includes(search.toLowerCase()) ||
+      lead.description.toLowerCase().includes(search.toLowerCase()) ||
+      lead.city.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesCategory = !categoryFilter || lead.category_id === categoryFilter;
+    
+    return matchesSearch && matchesCategory;
+  }) || [];
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
@@ -93,6 +63,15 @@ export const LeadsList = () => {
   };
 
   const handleUnlockLead = async (serviceRequestId: string) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para desbloquear leads.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!credits || credits.balance < 1) {
       toast({
         title: "Créditos insuficientes",
@@ -102,28 +81,15 @@ export const LeadsList = () => {
       return;
     }
 
+    console.log('Attempting to unlock lead:', serviceRequestId);
+    
     try {
-      // Call unlock lead function
-      const { error } = await supabase.rpc('unlock_lead', {
-        p_provider_id: credits.provider_id,
-        p_service_request_id: serviceRequestId,
-        p_credits_used: 1
-      });
-
-      if (error) throw error;
-
+      await spendCredits({ serviceRequestId, amount: 1 });
+      console.log('Lead unlocked successfully, refreshing list');
       refetch(); // Refresh the leads list
-      toast({
-        title: "Lead desbloqueado!",
-        description: "Agora você pode ver os dados de contato do cliente.",
-      });
     } catch (error) {
       console.error('Error unlocking lead:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível desbloquear o lead. Tente novamente.",
-        variant: "destructive",
-      });
+      // Error is handled by the spendCredits function
     }
   };
 
@@ -185,7 +151,7 @@ export const LeadsList = () => {
 
       {/* Results */}
       <div className="space-y-4">
-        {!leads || leads.length === 0 ? (
+        {!filteredLeads || filteredLeads.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <Eye className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -196,8 +162,8 @@ export const LeadsList = () => {
             </CardContent>
           </Card>
         ) : (
-          leads.map((lead) => {
-            const isUnlocked = unlockedLeads?.includes(lead.id);
+          filteredLeads.map((lead) => {
+            const isUnlocked = lead.isUnlocked;
             
             return (
               <Card key={lead.id} className="hover:shadow-md transition-shadow">

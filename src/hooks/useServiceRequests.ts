@@ -70,23 +70,49 @@ export const useServiceRequests = (filters: ServiceRequestFilters = {}) => {
   // Create service request
   const createRequest = useMutation({
     mutationFn: async (requestData: ServiceRequestForm) => {
-      if (!user) throw new Error('User not authenticated');
+      console.log('Creating service request:', { user: user?.id, requestData });
+      
+      if (!user) {
+        console.error('No user found');
+        throw new Error('User not authenticated');
+      }
+
+      const insertData = {
+        title: requestData.title,
+        description: requestData.description,
+        category_id: requestData.category_id,
+        city: requestData.city,
+        state: requestData.state,
+        urgency: requestData.urgency || null,
+        budget_min: requestData.budget_min || null,
+        budget_max: requestData.budget_max || null,
+        contact_phone: requestData.contact_phone || null,
+        contact_email: requestData.contact_email || user.email || null,
+        client_id: user.id,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'active' as Database['public']['Enums']['service_request_status']
+      };
+
+      console.log('Insert data:', insertData);
 
       const { data, error } = await supabase
         .from('service_requests')
-        .insert({
-          ...requestData,
-          client_id: user.id,
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        })
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Request created successfully:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['service_requests'] });
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
       toast({
         title: "Solicitação criada!",
         description: "Sua solicitação foi criada com sucesso.",
@@ -96,7 +122,7 @@ export const useServiceRequests = (filters: ServiceRequestFilters = {}) => {
       console.error('Error creating service request:', error);
       toast({
         title: "Erro ao criar solicitação",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },

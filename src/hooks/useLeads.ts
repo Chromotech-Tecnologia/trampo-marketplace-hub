@@ -1,36 +1,24 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Database } from '@/integrations/supabase/types';
 
-interface LeadFilters {
-  category_id?: string;
-  city?: string;
-  state?: string;
-  budget_min?: number;
-  budget_max?: number;
-}
-
-export const useLeads = (filters: LeadFilters = {}) => {
+export const useLeads = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
 
-  // Fetch available leads (service requests that are active)
-  const { data: leads, isLoading } = useQuery({
-    queryKey: ['leads', filters],
+  // Fetch available leads for providers
+  const { data: leads, isLoading, error, refetch } = useQuery({
+    queryKey: ['leads', user?.id],
     queryFn: async () => {
-      let query = supabase
+      if (!user) return [];
+      
+      console.log('Fetching leads for provider:', user.id);
+
+      // Get leads (service requests) that are active and not expired
+      const { data: serviceRequests, error: requestsError } = await supabase
         .from('service_requests')
         .select(`
-          id,
-          title,
-          description,
-          city,
-          state,
-          urgency,
-          budget_min,
-          budget_max,
-          created_at,
-          expires_at,
+          *,
           service_categories (
             id,
             name
@@ -38,88 +26,48 @@ export const useLeads = (filters: LeadFilters = {}) => {
         `)
         .eq('status', 'active')
         .gt('expires_at', new Date().toISOString())
-        .neq('client_id', user?.id || '') // Don't show user's own requests
         .order('created_at', { ascending: false });
 
-      if (filters.category_id) {
-        query = query.eq('category_id', filters.category_id);
+      if (requestsError) {
+        console.error('Error fetching service requests:', requestsError);
+        throw requestsError;
       }
 
-      if (filters.city) {
-        query = query.ilike('city', `%${filters.city}%`);
-      }
+      console.log('Available service requests:', serviceRequests);
 
-      if (filters.state) {
-        query = query.eq('state', filters.state);
-      }
-
-      if (filters.budget_min) {
-        query = query.gte('budget_min', filters.budget_min);
-      }
-
-      if (filters.budget_max) {
-        query = query.lte('budget_max', filters.budget_max);
-      }
-
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  // Fetch unlocked leads for current user
-  const { data: unlockedLeads } = useQuery({
-    queryKey: ['lead_unlocks', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      
-      const { data, error } = await supabase
+      // Get unlocked leads for this provider
+      const { data: unlockedLeads, error: unlockedError } = await supabase
         .from('lead_unlocks')
-        .select(`
-          *,
-          service_requests (
-            id,
-            title,
-            description,
-            contact_email,
-            contact_phone,
-            city,
-            state,
-            urgency,
-            budget_min,
-            budget_max,
-            service_categories (
-              name
-            )
-          )
-        `)
-        .eq('provider_id', user.id)
-        .order('unlocked_at', { ascending: false });
+        .select('service_request_id')
+        .eq('provider_id', user.id);
 
-      if (error) throw error;
-      return data || [];
+      if (unlockedError) {
+        console.error('Error fetching unlocked leads:', unlockedError);
+        throw unlockedError;
+      }
+
+      console.log('Unlocked leads:', unlockedLeads);
+
+      const unlockedIds = new Set(unlockedLeads?.map(unlock => unlock.service_request_id) || []);
+
+      // Mark leads as unlocked or locked
+      const leadsWithStatus = serviceRequests?.map(request => ({
+        ...request,
+        isUnlocked: unlockedIds.has(request.id),
+      })) || [];
+
+      console.log('Leads with unlock status:', leadsWithStatus);
+      
+      return leadsWithStatus;
     },
     enabled: !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
-
-  // Check if a lead is unlocked
-  const isLeadUnlocked = (serviceRequestId: string) => {
-    return unlockedLeads?.some(unlock => unlock.service_request_id === serviceRequestId) || false;
-  };
-
-  // Get unlocked lead data
-  const getUnlockedLeadData = (serviceRequestId: string) => {
-    const unlock = unlockedLeads?.find(unlock => unlock.service_request_id === serviceRequestId);
-    return unlock?.service_requests || null;
-  };
 
   return {
     leads: leads || [],
-    unlockedLeads: unlockedLeads || [],
     isLoading,
-    isLeadUnlocked,
-    getUnlockedLeadData,
+    error,
+    refetch,
   };
 };
