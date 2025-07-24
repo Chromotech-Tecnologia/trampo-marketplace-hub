@@ -1,15 +1,21 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileText, Users, MessageSquare } from 'lucide-react';
+import { Plus, FileText, Users, MessageSquare, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ServiceRequestList } from '@/components/ServiceRequestList';
 
 const ClientDashboard = () => {
   const { signOut } = useAuth();
   const { data: profile } = useProfile();
+  const { requests } = useServiceRequests();
   const navigate = useNavigate();
+
+  const activeRequests = requests.filter(req => req.status === 'active');
+  const completedRequests = requests.filter(req => req.status === 'completed');
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,9 +26,19 @@ const ClientDashboard = () => {
               <h1 className="text-2xl font-bold text-foreground">Área do Cliente</h1>
               <p className="text-muted-foreground">Bem-vindo, {profile?.name}</p>
             </div>
-            <Button variant="outline" onClick={signOut}>
-              Sair
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => window.open('/', '_blank')}
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Ir para Home
+              </Button>
+              <Button variant="outline" onClick={signOut}>
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -35,7 +51,7 @@ const ClientDashboard = () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{activeRequests.length}</div>
               <p className="text-xs text-muted-foreground">Aguardando propostas</p>
             </CardContent>
           </Card>
@@ -57,7 +73,7 @@ const ClientDashboard = () => {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{completedRequests.length}</div>
               <p className="text-xs text-muted-foreground">Histórico total</p>
             </CardContent>
           </Card>
@@ -87,19 +103,7 @@ const ClientDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma solicitação</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Você ainda não criou nenhuma solicitação de serviço.
-                </p>
-                <div className="mt-6">
-                  <Button onClick={() => navigate('/nova-solicitacao')}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nova Solicitação
-                  </Button>
-                </div>
-              </div>
+              <ServiceRequestList />
             </CardContent>
           </Card>
 

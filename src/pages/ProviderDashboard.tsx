@@ -2,15 +2,20 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useCredits } from '@/hooks/useCredits';
+import { useLeads } from '@/hooks/useLeads';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Eye, CheckCircle, TrendingUp } from 'lucide-react';
+import { Coins, Eye, CheckCircle, TrendingUp, ExternalLink } from 'lucide-react';
 import { LeadsList } from '@/components/LeadsList';
 
 const ProviderDashboard = () => {
   const { signOut } = useAuth();
   const { data: profile } = useProfile();
   const { credits } = useCredits();
+  const { leads } = useLeads();
+
+  const availableLeads = leads.filter(lead => !lead.isUnlocked);
+  const unlockedLeads = leads.filter(lead => lead.isUnlocked);
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,9 +26,19 @@ const ProviderDashboard = () => {
               <h1 className="text-2xl font-bold text-foreground">Área do Fornecedor</h1>
               <p className="text-muted-foreground">Bem-vindo, {profile?.name}</p>
             </div>
-            <Button variant="outline" onClick={signOut}>
-              Sair
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => window.open('/', '_blank')}
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Ir para Home
+              </Button>
+              <Button variant="outline" onClick={signOut}>
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -47,8 +62,8 @@ const ProviderDashboard = () => {
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">Novos hoje</p>
+              <div className="text-2xl font-bold">{availableLeads.length}</div>
+              <p className="text-xs text-muted-foreground">Disponíveis agora</p>
             </CardContent>
           </Card>
 
@@ -58,7 +73,7 @@ const ProviderDashboard = () => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{unlockedLeads.length}</div>
               <p className="text-xs text-muted-foreground">Este mês</p>
             </CardContent>
           </Card>
