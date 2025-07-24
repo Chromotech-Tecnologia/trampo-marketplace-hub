@@ -15,7 +15,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAuth = true,
   userType 
 }) => {
-  const { user, loading: authLoading } = useAuth();
+  // Add error boundary for auth context
+  let user = null;
+  let authLoading = true;
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    authLoading = auth.loading;
+  } catch (error) {
+    console.error('Auth context not available in ProtectedRoute:', error);
+    authLoading = false;
+  }
+  
   const { data: profile, isLoading: profileLoading } = useProfile();
 
   if (authLoading || profileLoading) {

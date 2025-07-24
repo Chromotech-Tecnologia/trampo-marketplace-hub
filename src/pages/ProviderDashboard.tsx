@@ -9,7 +9,16 @@ import { Coins, Eye, CheckCircle, TrendingUp, ExternalLink } from 'lucide-react'
 import { LeadsList } from '@/components/LeadsList';
 
 const ProviderDashboard = () => {
-  const { signOut } = useAuth();
+  // Add error boundary for auth context
+  let signOut = () => {};
+  
+  try {
+    const auth = useAuth();
+    signOut = auth.signOut;
+  } catch (error) {
+    console.error('Auth context not available in ProviderDashboard:', error);
+  }
+  
   const { data: profile } = useProfile();
   const { credits } = useCredits();
   const { leads } = useLeads();

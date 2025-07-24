@@ -9,7 +9,16 @@ import { useNavigate } from 'react-router-dom';
 import { ServiceRequestList } from '@/components/ServiceRequestList';
 
 const ClientDashboard = () => {
-  const { signOut } = useAuth();
+  // Add error boundary for auth context
+  let signOut = () => {};
+  
+  try {
+    const auth = useAuth();
+    signOut = auth.signOut;
+  } catch (error) {
+    console.error('Auth context not available in ClientDashboard:', error);
+  }
+  
   const { data: profile } = useProfile();
   const { requests } = useServiceRequests();
   const navigate = useNavigate();
