@@ -1,13 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Building, Shield } from "lucide-react";
+import { Menu, X, User, Building } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  
+  // Add error boundary for auth context
+  let user = null;
+  let signOut = () => {};
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    signOut = auth.signOut;
+  } catch (error) {
+    console.error('Auth context not available:', error);
+  }
+  
   const { data: profile } = useProfile();
   const navigate = useNavigate();
 
