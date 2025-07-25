@@ -34,17 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Redirect to user area after login
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            const userType = session.user.user_metadata?.user_type;
-            if (userType === 'client') {
-              window.location.href = '/cliente';
-            } else if (userType === 'provider') {
-              window.location.href = '/fornecedor';
-            }
-          }, 100);
-        }
+        // No automatic redirects here to prevent loops
       }
     );
 
