@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -27,10 +26,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     console.error('Auth context not available in ProtectedRoute:', error);
     authLoading = false;
   }
-  
-  const { data: profile, isLoading: profileLoading } = useProfile();
 
-  if (authLoading || profileLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -42,16 +39,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth" replace />;
   }
 
-  if (userType && profile?.user_type !== userType) {
-    // Redirect based on user type
-    if (profile?.user_type === 'client') {
-      return <Navigate to="/cliente" replace />;
-    } else if (profile?.user_type === 'provider') {
-      return <Navigate to="/fornecedor" replace />;
-    } else if (profile?.user_type === 'admin') {
-      return <Navigate to="/admin" replace />;
+  // Check user type from user metadata instead of profile table
+  if (userType && user) {
+    const userMetaType = user.user_metadata?.user_type;
+    if (userMetaType !== userType) {
+      // Redirect based on user type
+      if (userMetaType === 'client') {
+        return <Navigate to="/cliente" replace />;
+      } else if (userMetaType === 'provider') {
+        return <Navigate to="/fornecedor" replace />;
+      } else if (userMetaType === 'admin') {
+        return <Navigate to="/admin" replace />;
+      }
+      return <Navigate to="/" replace />;
     }
-    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
