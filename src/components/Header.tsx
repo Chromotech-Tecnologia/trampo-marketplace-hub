@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Building } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfile } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -20,14 +19,16 @@ const Header = () => {
     console.error('Auth context not available:', error);
   }
   
-  const { data: profile } = useProfile();
   const navigate = useNavigate();
 
   const handleDashboardClick = () => {
-    if (profile?.user_type === 'client') {
-      navigate('/cliente');
-    } else if (profile?.user_type === 'provider') {
-      navigate('/fornecedor');
+    if (user) {
+      const userType = user.user_metadata?.user_type;
+      if (userType === 'client') {
+        navigate('/cliente');
+      } else if (userType === 'provider') {
+        navigate('/fornecedor');
+      }
     }
   };
 
