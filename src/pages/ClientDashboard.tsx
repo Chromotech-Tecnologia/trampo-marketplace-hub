@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,15 +10,16 @@ import { ServiceRequestList } from '@/components/ServiceRequestList';
 const ClientDashboard = () => {
   // Add error boundary for auth context
   let signOut = () => {};
+  let user = null;
   
   try {
     const auth = useAuth();
     signOut = auth.signOut;
+    user = auth.user;
   } catch (error) {
     console.error('Auth context not available in ClientDashboard:', error);
   }
   
-  const { data: profile } = useProfile();
   const { requests } = useServiceRequests();
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ const ClientDashboard = () => {
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Área do Cliente</h1>
-              <p className="text-muted-foreground">Bem-vindo, {profile?.name}</p>
+              <p className="text-muted-foreground">Bem-vindo, {user?.user_metadata?.name || user?.email}</p>
             </div>
             <div className="flex gap-2">
               <Button 

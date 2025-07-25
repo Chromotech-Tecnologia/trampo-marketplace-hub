@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
 import { useCredits } from '@/hooks/useCredits';
 import { useLeads } from '@/hooks/useLeads';
 import { Button } from '@/components/ui/button';
@@ -11,15 +10,16 @@ import { LeadsList } from '@/components/LeadsList';
 const ProviderDashboard = () => {
   // Add error boundary for auth context
   let signOut = () => {};
+  let user = null;
   
   try {
     const auth = useAuth();
     signOut = auth.signOut;
+    user = auth.user;
   } catch (error) {
     console.error('Auth context not available in ProviderDashboard:', error);
   }
   
-  const { data: profile } = useProfile();
   const { credits } = useCredits();
   const { leads } = useLeads();
 
@@ -33,7 +33,7 @@ const ProviderDashboard = () => {
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Área do Fornecedor</h1>
-              <p className="text-muted-foreground">Bem-vindo, {profile?.name}</p>
+              <p className="text-muted-foreground">Bem-vindo, {user?.user_metadata?.name || user?.email}</p>
             </div>
             <div className="flex gap-2">
               <Button 
