@@ -42,7 +42,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Check user type from user metadata instead of profile table
   if (userType && user) {
     const userMetaType = user.user_metadata?.user_type;
-    if (userMetaType !== userType) {
+    console.log('ProtectedRoute - Expected:', userType, 'Actual:', userMetaType);
+    if (userMetaType && userMetaType !== userType) {
       // Redirect based on user type
       if (userMetaType === 'client') {
         return <Navigate to="/cliente" replace />;
