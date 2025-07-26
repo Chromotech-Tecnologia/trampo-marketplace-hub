@@ -1,9 +1,11 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, FileText, Users, MessageSquare, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ServiceRequestList } from '@/components/ServiceRequestList';
 
 
 const ClientDashboard = () => {
@@ -19,12 +21,11 @@ const ClientDashboard = () => {
     console.error('Auth context not available in ClientDashboard:', error);
   }
   
+  const { requests } = useServiceRequests();
   const navigate = useNavigate();
-  
-  // Temporary mock data until database is properly set up
-  const requests = [];
-  const activeRequests = [];
-  const completedRequests = [];
+
+  const activeRequests = requests.filter(req => req.status === 'active');
+  const completedRequests = requests.filter(req => req.status === 'completed');
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,13 +113,7 @@ const ClientDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma solicitação</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Você ainda não criou nenhuma solicitação de serviço.
-                </p>
-              </div>
+              <ServiceRequestList />
             </CardContent>
           </Card>
 

@@ -1,8 +1,11 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCredits } from '@/hooks/useCredits';
+import { useLeads } from '@/hooks/useLeads';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Eye, CheckCircle, TrendingUp, ExternalLink } from 'lucide-react';
+import { LeadsList } from '@/components/LeadsList';
 
 
 const ProviderDashboard = () => {
@@ -18,11 +21,11 @@ const ProviderDashboard = () => {
     console.error('Auth context not available in ProviderDashboard:', error);
   }
   
-  // Temporary mock data until database is properly set up
-  const credits = { balance: 0 };
-  const leads = [];
-  const availableLeads = [];
-  const unlockedLeads = [];
+  const { credits } = useCredits();
+  const { leads } = useLeads();
+
+  const availableLeads = leads.filter(lead => !lead.isUnlocked);
+  const unlockedLeads = leads.filter(lead => lead.isUnlocked);
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,23 +101,7 @@ const ProviderDashboard = () => {
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Leads Disponíveis</CardTitle>
-              <CardDescription>
-                Visualize e desbloqueie leads de clientes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Eye className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum lead disponível</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Não há leads disponíveis no momento.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <LeadsList />
 
           <Card>
             <CardHeader>
