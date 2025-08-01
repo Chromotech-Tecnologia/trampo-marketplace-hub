@@ -11,13 +11,24 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { useServiceRequests, type ServiceRequestForm } from '@/hooks/useServiceRequests';
+export interface ServiceRequestForm {
+  title: string;
+  description: string;
+  category_id: string;
+  urgency: string;
+  city: string;
+  state: string;
+  budget_min?: number;
+  budget_max?: number;
+  contact_email?: string;
+  contact_phone?: string;
+}
 
 const NewServiceRequest = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { createRequest, isCreating } = useServiceRequests();
+  const [isCreating, setIsCreating] = useState(false);
   
   const [formData, setFormData] = useState<ServiceRequestForm>({
     title: '',
@@ -32,20 +43,22 @@ const NewServiceRequest = () => {
     contact_email: '',
   });
 
-  // Fetch service categories
-  const { data: categories } = useQuery({
-    queryKey: ['service-categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('service_categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Temporary mock categories until database is set up
+  const categories = [
+    { id: '1', name: 'Encanador' },
+    { id: '2', name: 'Eletricista' },
+    { id: '3', name: 'Pedreiro' },
+    { id: '4', name: 'Pintor' },
+    { id: '5', name: 'Jardineiro' },
+    { id: '6', name: 'Desenvolvedor Web' },
+    { id: '7', name: 'Design Gráfico' },
+    { id: '8', name: 'Marketing Digital' },
+    { id: '9', name: 'Fotógrafo' },
+    { id: '10', name: 'Advogado' },
+    { id: '11', name: 'Contador' },
+    { id: '12', name: 'Limpeza' },
+    { id: '13', name: 'Outros' }
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,21 +81,19 @@ const NewServiceRequest = () => {
       return;
     }
 
-    try {
-      await createRequest({
-        ...formData,
-        contact_email: formData.contact_email || user.email || '',
+    // Simulate successful creation (temporary until database is configured)
+    setIsCreating(true);
+    
+    setTimeout(() => {
+      setIsCreating(false);
+      toast({
+        title: "Solicitação criada!",
+        description: "Sua solicitação foi criada com sucesso.",
       });
       
       // Navigate after successful creation
       navigate('/cliente');
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Erro ao criar solicitação. Tente novamente.",
-      });
-    }
+    }, 1000);
   };
 
   return (
