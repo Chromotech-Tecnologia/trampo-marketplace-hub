@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, FileText, Users, MessageSquare, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useServiceRequests } from '@/hooks/useServiceRequests';
+import { ServiceRequestList } from '@/components/ServiceRequestList';
 
 
 const ClientDashboard = () => {
@@ -21,8 +23,8 @@ const ClientDashboard = () => {
   
   const navigate = useNavigate();
   
-  // Temporary mock data until database is properly set up
-  const requests: any[] = [];
+  // Fetch user's service requests
+  const { requests, isLoading } = useServiceRequests();
   const activeRequests = requests.filter(req => req.status === 'active');
   const completedRequests = requests.filter(req => req.status === 'completed');
 
@@ -103,7 +105,7 @@ const ClientDashboard = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Minhas Solicitações</CardTitle>
@@ -112,31 +114,30 @@ const ClientDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma solicitação</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Você ainda não criou nenhuma solicitação de serviço.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Propostas Recebidas</CardTitle>
-              <CardDescription>
-                Analise as propostas dos fornecedores
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma proposta</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Você ainda não recebeu propostas para suas solicitações.
-                </p>
-              </div>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 mx-auto"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                  </div>
+                </div>
+              ) : requests.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma solicitação</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Você ainda não criou nenhuma solicitação de serviço.
+                  </p>
+                  <Button 
+                    className="mt-4" 
+                    onClick={() => navigate('/nova-solicitacao')}
+                  >
+                    Criar Primeira Solicitação
+                  </Button>
+                </div>
+              ) : (
+                <ServiceRequestList />
+              )}
             </CardContent>
           </Card>
         </div>

@@ -3,6 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Eye, CheckCircle, TrendingUp, ExternalLink } from 'lucide-react';
+import { useCredits } from '@/hooks/useCredits';
+import { useLeads } from '@/hooks/useLeads';
+import { LeadsList } from '@/components/LeadsList';
 
 
 const ProviderDashboard = () => {
@@ -18,9 +21,9 @@ const ProviderDashboard = () => {
     console.error('Auth context not available in ProviderDashboard:', error);
   }
   
-  // Temporary mock data until database is properly set up
-  const credits = { balance: 0 };
-  const leads: any[] = [];
+  // Fetch real data from the database
+  const { credits, isLoadingCredits, purchaseCredits } = useCredits();
+  const { leads, isLoading: isLoadingLeads } = useLeads();
   const availableLeads = leads.filter(lead => !lead.isUnlocked);
   const unlockedLeads = leads.filter(lead => lead.isUnlocked);
 
@@ -106,13 +109,24 @@ const ProviderDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Eye className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum lead disponível</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Não há leads disponíveis no momento.
-                </p>
-              </div>
+              {isLoadingLeads ? (
+                <div className="text-center py-8">
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 mx-auto"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                  </div>
+                </div>
+              ) : leads.length === 0 ? (
+                <div className="text-center py-8">
+                  <Eye className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum lead disponível</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Não há leads disponíveis no momento.
+                  </p>
+                </div>
+              ) : (
+                <LeadsList />
+              )}
             </CardContent>
           </Card>
 
@@ -132,7 +146,7 @@ const ProviderDashboard = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold">R$ 5,00</p>
-                    <Button size="sm">Comprar</Button>
+                    <Button size="sm" onClick={() => purchaseCredits('basic')}>Comprar</Button>
                   </div>
                 </div>
                 
@@ -142,9 +156,9 @@ const ProviderDashboard = () => {
                     <p className="text-sm text-muted-foreground">Desbloqueio de 10 leads</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">R$ 45,00</p>
+                    <p className="font-bold">R$ 69,99</p>
                     <p className="text-xs text-green-600">Economize 10%</p>
-                    <Button size="sm">Comprar</Button>
+                    <Button size="sm" onClick={() => purchaseCredits('standard')}>Comprar</Button>
                   </div>
                 </div>
                 
@@ -154,9 +168,9 @@ const ProviderDashboard = () => {
                     <p className="text-sm text-muted-foreground">Desbloqueio de 50 leads</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">R$ 200,00</p>
+                    <p className="font-bold">R$ 129,99</p>
                     <p className="text-xs text-green-600">Economize 20%</p>
-                    <Button size="sm">Comprar</Button>
+                    <Button size="sm" onClick={() => purchaseCredits('premium')}>Comprar</Button>
                   </div>
                 </div>
               </div>
