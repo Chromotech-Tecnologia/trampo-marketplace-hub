@@ -27,8 +27,8 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
 
   const { requests, isLoading, deleteRequest, updateStatus } = useServiceRequests({
     search,
-    status: (statusFilter || undefined) as Database['public']['Enums']['service_request_status'] | undefined,
-    category_id: categoryFilter || undefined,
+    status: (statusFilter && statusFilter !== 'all' ? statusFilter : undefined) as Database['public']['Enums']['service_request_status'] | undefined,
+    category_id: categoryFilter && categoryFilter !== 'all' ? categoryFilter : undefined,
   });
 
   // Fetch categories for filter
@@ -132,7 +132,7 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="all">Todos os status</SelectItem>
                   <SelectItem value="active">Ativo</SelectItem>
                   <SelectItem value="paused">Pausado</SelectItem>
                   <SelectItem value="completed">Concluído</SelectItem>
@@ -148,7 +148,7 @@ export const ServiceRequestList = ({ onEdit, onView }: ServiceRequestListProps) 
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
                   {categories?.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
