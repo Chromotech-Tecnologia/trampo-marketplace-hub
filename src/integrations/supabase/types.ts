@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_plans: {
+        Row: {
+          created_at: string
+          credits_amount: number
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          payment_link: string | null
+          plan_type: string
+          price: number
+          recurrence: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credits_amount: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          payment_link?: string | null
+          plan_type: string
+          price: number
+          recurrence?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credits_amount?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          payment_link?: string | null
+          plan_type?: string
+          price?: number
+          recurrence?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      credit_purchases: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          credits_amount: number
+          id: string
+          payment_reference: string | null
+          plan_id: string
+          provider_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          credits_amount: number
+          id?: string
+          payment_reference?: string | null
+          plan_id: string
+          provider_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          credits_amount?: number
+          id?: string
+          payment_reference?: string | null
+          plan_id?: string
+          provider_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_purchases_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "credit_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -368,7 +463,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_stats: {
+        Row: {
+          total_clients: number | null
+          total_credits_available: number | null
+          total_credits_purchased: number | null
+          total_credits_used: number | null
+          total_providers: number | null
+          total_requests: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_admin_user: {
