@@ -463,22 +463,23 @@ export type Database = {
       }
     }
     Views: {
-      admin_stats: {
-        Row: {
-          total_clients: number | null
-          total_credits_available: number | null
-          total_credits_purchased: number | null
-          total_credits_used: number | null
-          total_providers: number | null
-          total_requests: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_admin_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_clients: number
+          total_providers: number
+          total_requests: number
+          total_credits_purchased: number
+          total_credits_used: number
+          total_credits_available: number
+        }[]
       }
       is_admin: {
         Args: Record<PropertyKey, never>
