@@ -11,6 +11,7 @@ import ClientDashboard from "./pages/ClientDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import NewServiceRequest from "./pages/NewServiceRequest";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,14 @@ const App = () => (
               element={
                 <ProtectedRoute userType="client">
                   <NewServiceRequest />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/*" 
+              element={
+                <ProtectedRoute userType="admin">
+                  <AdminDashboard />
                 </ProtectedRoute>
               } 
             />
