@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -27,7 +28,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     authLoading = false;
   }
 
-  if (authLoading) {
+  // Get user profile to check actual user type
+  const { data: profile, isLoading: profileLoading } = useProfile();
+
+  if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -39,17 +43,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Check user type from user metadata instead of profile table
-  if (userType && user) {
-    const userMetaType = user.user_metadata?.user_type;
-    console.log('ProtectedRoute - Expected:', userType, 'Actual:', userMetaType);
-    if (userMetaType && userMetaType !== userType) {
-      // Redirect based on user type
-      if (userMetaType === 'client') {
+  // Check user type from profile table
+  if (userType && user && profile) {
+    const actualUserType = profile.user_type;
+    console.log('ProtectedRoute - Expected:', userType, 'Actual:', actualUserType);
+    
+    if (actualUserType !== userType) {
+      // Redirect based on actual user type
+      if (actualUserType === 'client') {
         return <Navigate to="/cliente" replace />;
-      } else if (userMetaType === 'provider') {
+      } else if (actualUserType === 'provider') {
         return <Navigate to="/fornecedor" replace />;
-      } else if (userMetaType === 'admin') {
+      } else if (actualUserType === 'admin') {
         return <Navigate to="/admin" replace />;
       }
       return <Navigate to="/" replace />;
