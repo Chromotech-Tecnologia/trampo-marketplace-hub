@@ -485,6 +485,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      promote_user_to_admin: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
       unlock_lead: {
         Args: {
           p_provider_id: string
