@@ -142,7 +142,7 @@ const Auth = () => {
             <img 
               src="/lovable-uploads/125e39ea-9966-45b5-817c-edd2d52c6f17.png" 
               alt="Mais Trampo" 
-              className="h-20 w-auto"
+              className="h-32 w-auto"
             />
           </div>
           <CardDescription className="text-center">

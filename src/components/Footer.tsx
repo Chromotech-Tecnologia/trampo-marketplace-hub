@@ -9,13 +9,11 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="bg-gradient-hero p-2 rounded-lg">
-                <Building className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold">Mais Trampo</h3>
-                <p className="text-sm text-muted">Conectando você ao trabalho</p>
-              </div>
+              <img 
+                src="/lovable-uploads/6c522438-4426-4558-834c-931bef48b71f.png" 
+                alt="Mais Trampo" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-muted leading-relaxed mb-4">
               A maior plataforma de serviços do Brasil. Conectamos clientes e profissionais 
