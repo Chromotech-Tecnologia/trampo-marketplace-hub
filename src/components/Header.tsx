@@ -37,14 +37,12 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="bg-gradient-hero p-2 rounded-lg">
-              <Building className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Mais Trampo</h1>
-              <p className="text-xs text-muted-foreground">Conectando você ao trabalho</p>
-            </div>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <img 
+              src="/lovable-uploads/6c522438-4426-4558-834c-931bef48b71f.png" 
+              alt="Mais Trampo" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}

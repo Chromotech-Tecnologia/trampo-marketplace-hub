@@ -137,8 +137,14 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Mais Trampo</CardTitle>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/125e39ea-9966-45b5-817c-edd2d52c6f17.png" 
+              alt="Mais Trampo" 
+              className="h-20 w-auto"
+            />
+          </div>
           <CardDescription className="text-center">
             Conectando clientes e fornecedores de serviços
           </CardDescription>

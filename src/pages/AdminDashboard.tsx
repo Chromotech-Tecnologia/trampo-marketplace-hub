@@ -122,7 +122,12 @@ const AdminDashboard = () => {
           <header className="h-16 border-b flex items-center justify-between px-6 bg-background">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
-              <h1 className="text-xl font-semibold">Painel Administrativo</h1>
+              <img 
+                src="/lovable-uploads/6c522438-4426-4558-834c-931bef48b71f.png" 
+                alt="Mais Trampo" 
+                className="h-8 w-auto"
+              />
+              <span className="text-lg font-semibold text-muted-foreground">Admin</span>
             </div>
             <button
               onClick={signOut}

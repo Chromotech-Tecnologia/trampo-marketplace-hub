@@ -32,9 +32,16 @@ const ProviderDashboard = () => {
       <header className="border-b bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Área do Fornecedor</h1>
-              <p className="text-muted-foreground">Bem-vindo, {user?.user_metadata?.name || user?.email}</p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/lovable-uploads/6c522438-4426-4558-834c-931bef48b71f.png" 
+                alt="Mais Trampo" 
+                className="h-8 w-auto"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Área do Fornecedor</h1>
+                <p className="text-muted-foreground">Bem-vindo, {user?.user_metadata?.name || user?.email}</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button 
