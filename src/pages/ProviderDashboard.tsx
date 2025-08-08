@@ -6,6 +6,7 @@ import { Coins, Eye, CheckCircle, TrendingUp, ExternalLink } from 'lucide-react'
 import { useCredits } from '@/hooks/useCredits';
 import { useLeads } from '@/hooks/useLeads';
 import { LeadsList } from '@/components/LeadsList';
+import { CreditManager } from '@/components/CreditManager';
 
 
 const ProviderDashboard = () => {
@@ -137,52 +138,7 @@ const ProviderDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciar Créditos</CardTitle>
-              <CardDescription>
-                Compre créditos para desbloquear leads
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-semibold">1 Crédito</h4>
-                    <p className="text-sm text-muted-foreground">Desbloqueio de 1 lead</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">R$ 5,00</p>
-                    <Button size="sm" onClick={() => purchaseCredits('basic')}>Comprar</Button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-semibold">Pacote 10 Créditos</h4>
-                    <p className="text-sm text-muted-foreground">Desbloqueio de 10 leads</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">R$ 69,99</p>
-                    <p className="text-xs text-green-600">Economize 10%</p>
-                    <Button size="sm" onClick={() => purchaseCredits('standard')}>Comprar</Button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-semibold">Pacote 50 Créditos</h4>
-                    <p className="text-sm text-muted-foreground">Desbloqueio de 50 leads</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">R$ 129,99</p>
-                    <p className="text-xs text-green-600">Economize 20%</p>
-                    <Button size="sm" onClick={() => purchaseCredits('premium')}>Comprar</Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <CreditManager />
         </div>
       </main>
     </div>
