@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLeads } from '@/hooks/useLeads';
 import { useAuth } from '@/contexts/AuthContext';
 
-export const LeadsList = () => {
+export const LeadsList = ({ onShowPlansModal }: { onShowPlansModal?: () => void }) => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const { user } = useAuth();
@@ -50,7 +50,9 @@ export const LeadsList = () => {
   }) || [];
 
   const handleBuyCredits = () => {
-    // Open buy credits modal - this will be handled by parent component
+    if (onShowPlansModal) {
+      onShowPlansModal();
+    }
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -242,6 +244,14 @@ export const LeadsList = () => {
                     </div>
 
                     <div className="flex gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBuyCredits}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver
+                      </Button>
                       {!isUnlocked ? (
                         credits && credits.balance >= 1 ? (
                           <Button

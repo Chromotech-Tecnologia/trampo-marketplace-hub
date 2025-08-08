@@ -32,6 +32,7 @@ const ProviderDashboard = () => {
   const { leads, isLoading: isLoadingLeads } = useLeads();
   const { data: creditPlans, isLoading: isLoadingPlans } = useCreditPlans();
   const [leadFilter, setLeadFilter] = useState<'all' | 'unlocked'>('all');
+  const [showPlansModal, setShowPlansModal] = useState(false);
   
   const availableLeads = leads.filter(lead => !lead.isUnlocked);
   const unlockedLeads = leads.filter(lead => lead.isUnlocked);
@@ -63,70 +64,14 @@ const ProviderDashboard = () => {
                       <p className="text-sm font-medium">Saldo de Créditos</p>
                       <p className="text-2xl font-bold text-primary">{credits?.balance || 0}</p>
                     </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Comprar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Comprar Créditos</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          {!creditPlans || creditPlans.length === 0 ? (
-                            <p className="text-center text-muted-foreground py-8">
-                              Nenhum plano de créditos disponível no momento.
-                            </p>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {creditPlans.map((plan, index) => (
-                                <Card 
-                                  key={plan.id} 
-                                  className={`relative ${index === 1 ? 'ring-2 ring-primary' : ''}`}
-                                >
-                                  {index === 1 && (
-                                    <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                                      Mais Popular
-                                    </Badge>
-                                  )}
-                                  <CardContent className="p-6 text-center">
-                                    <h3 className="font-semibold text-lg mb-2">{plan.name}</h3>
-                                    <div className="text-3xl font-bold text-primary mb-2">
-                                      {plan.credits_amount}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mb-1">créditos</p>
-                                    <div className="text-xl font-semibold mb-3">
-                                      R$ {(Number(plan.price) / 100).toFixed(2)}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                      {plan.description}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mb-4">
-                                      R$ {(Number(plan.price) / 100 / plan.credits_amount).toFixed(2)} por crédito
-                                    </p>
-                                    <Button
-                                      onClick={() => {
-                                        if (plan.payment_link) {
-                                          window.open(plan.payment_link, '_blank');
-                                        }
-                                      }}
-                                      disabled={isPurchasing || !plan.payment_link}
-                                      className="w-full"
-                                      variant={index === 1 ? 'default' : 'outline'}
-                                    >
-                                      <CreditCard className="h-4 w-4 mr-2" />
-                                      {isPurchasing ? 'Processando...' : 'Comprar'}
-                                    </Button>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowPlansModal(true)}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Comprar
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -296,12 +241,79 @@ const ProviderDashboard = () => {
                   </p>
                 </div>
               ) : (
-                <LeadsList />
+                <LeadsList onShowPlansModal={() => setShowPlansModal(true)} />
               )}
             </CardContent>
           </Card>
         </div>
       </main>
+
+      {/* Plans Modal */}
+      <Dialog open={showPlansModal} onOpenChange={setShowPlansModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Comprar Créditos</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {isLoadingPlans ? (
+              <div className="text-center py-8">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 mx-auto"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                </div>
+              </div>
+            ) : !creditPlans || creditPlans.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum plano de créditos disponível no momento.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {creditPlans.map((plan, index) => (
+                  <Card 
+                    key={plan.id} 
+                    className={`relative ${index === 1 ? 'ring-2 ring-primary' : ''}`}
+                  >
+                    {index === 1 && (
+                      <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                        Mais Popular
+                      </Badge>
+                    )}
+                    <CardContent className="p-6 text-center">
+                      <h3 className="font-semibold text-lg mb-2">{plan.name}</h3>
+                      <div className="text-3xl font-bold text-primary mb-2">
+                        {plan.credits_amount}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">créditos</p>
+                      <div className="text-xl font-semibold mb-3">
+                        R$ {(Number(plan.price) / 100).toFixed(2)}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {plan.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        R$ {(Number(plan.price) / 100 / plan.credits_amount).toFixed(2)} por crédito
+                      </p>
+                      <Button
+                        onClick={() => {
+                          if (plan.payment_link) {
+                            window.open(plan.payment_link, '_blank');
+                          }
+                        }}
+                        disabled={isPurchasing || !plan.payment_link}
+                        className="w-full"
+                        variant={index === 1 ? 'default' : 'outline'}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        {isPurchasing ? 'Processando...' : 'Comprar'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
