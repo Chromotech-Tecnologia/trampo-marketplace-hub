@@ -49,6 +49,10 @@ export const LeadsList = () => {
     return matchesSearch && matchesCategory;
   }) || [];
 
+  const handleBuyCredits = () => {
+    // Open buy credits modal - this will be handled by parent component
+  };
+
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'baixa':
@@ -239,15 +243,26 @@ export const LeadsList = () => {
 
                     <div className="flex gap-2 ml-4">
                       {!isUnlocked ? (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleUnlockLead(lead.id)}
-                          disabled={isSpending || !credits || credits.balance < 1}
-                        >
-                          <Lock className="h-4 w-4 mr-2" />
-                          Desbloquear (1 crédito)
-                        </Button>
+                        credits && credits.balance >= 1 ? (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleUnlockLead(lead.id)}
+                            disabled={isSpending}
+                          >
+                            <Lock className="h-4 w-4 mr-2" />
+                            Desbloquear (1 crédito)
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleBuyCredits}
+                          >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Comprar Créditos
+                          </Button>
+                        )
                       ) : (
                         <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
                           <Eye className="h-3 w-3 mr-1" />
