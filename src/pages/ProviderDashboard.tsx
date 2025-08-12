@@ -213,7 +213,7 @@ const ProviderDashboard = () => {
                   <Tabs value={leadFilter} onValueChange={(value) => setLeadFilter(value as 'all' | 'unlocked')}>
                     <TabsList>
                       <TabsTrigger value="all">Todos ({leads.length})</TabsTrigger>
-                      <TabsTrigger value="unlocked">Desbloqueados ({unlockedLeads.length})</TabsTrigger>
+                      <TabsTrigger value="unlocked">Meus Leads ({unlockedLeads.length})</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>

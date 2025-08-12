@@ -23,7 +23,6 @@ export const useCreditPlans = () => {
         .from('credit_plans')
         .select('*')
         .eq('is_active', true)
-        .eq('plan_type', 'one_time')
         .order('price');
 
       if (error) throw error;
