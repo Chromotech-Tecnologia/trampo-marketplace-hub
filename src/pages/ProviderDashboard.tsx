@@ -12,8 +12,9 @@ import { useCreditPlans } from '@/hooks/useCreditPlans';
 import { LeadsList } from '@/components/LeadsList';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-
+import { usePurchases } from '@/hooks/usePurchases';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { formatBRL } from '@/lib/utils';
 const ProviderDashboard = () => {
   // Add error boundary for auth context
   let signOut = () => {};
@@ -31,6 +32,7 @@ const ProviderDashboard = () => {
   const { credits, transactions, isLoadingCredits, purchaseCredits, isPurchasing, spendCredits } = useCredits();
   const { leads, isLoading: isLoadingLeads } = useLeads();
   const { data: creditPlans, isLoading: isLoadingPlans } = useCreditPlans();
+  const { pendingPurchase, isLoadingPending, createPurchase, isCreating } = usePurchases();
   const [leadFilter, setLeadFilter] = useState<'all' | 'unlocked'>('all');
   const [showPlansModal, setShowPlansModal] = useState(false);
   
@@ -152,6 +154,17 @@ const ProviderDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {pendingPurchase && (
+          <div className="mb-6">
+            <Alert>
+              <AlertTitle>Compra pendente em análise</AlertTitle>
+              <AlertDescription>
+                Você possui uma compra de {pendingPurchase.credits_amount} créditos aguardando aprovação. 
+                Método: {(pendingPurchase as any).payment_method?.toUpperCase() || 'PIX'}.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -285,26 +298,22 @@ const ProviderDashboard = () => {
                       </div>
                       <p className="text-sm text-muted-foreground mb-1">créditos</p>
                       <div className="text-xl font-semibold mb-3">
-                        R$ {(Number(plan.price) / 100).toFixed(2)}
+                        {formatBRL(Number(plan.price))}
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
                         {plan.description}
                       </p>
                       <p className="text-xs text-muted-foreground mb-4">
-                        R$ {(Number(plan.price) / 100 / plan.credits_amount).toFixed(2)} por crédito
+                        {formatBRL(Number(plan.price) / plan.credits_amount)} por crédito
                       </p>
                       <Button
-                        onClick={() => {
-                          if (plan.payment_link) {
-                            window.open(plan.payment_link, '_blank');
-                          }
-                        }}
-                        disabled={isPurchasing || !plan.payment_link}
+                        onClick={() => createPurchase({ plan })}
+                        disabled={isCreating || !!pendingPurchase}
                         className="w-full"
                         variant={index === 1 ? 'default' : 'outline'}
                       >
                         <CreditCard className="h-4 w-4 mr-2" />
-                        {isPurchasing ? 'Processando...' : 'Comprar'}
+                        {pendingPurchase ? 'Compra pendente' : isCreating ? 'Processando...' : 'Comprar'}
                       </Button>
                     </CardContent>
                   </Card>

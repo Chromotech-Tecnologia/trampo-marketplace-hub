@@ -6,7 +6,9 @@ import { useCreditPlans } from '@/hooks/useCreditPlans';
 import { Coins, CreditCard, History, Package } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
+import { usePurchases } from '@/hooks/usePurchases';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { formatBRL } from '@/lib/utils';
 export const CreditManager = () => {
   const { credits, transactions, isLoadingCredits, purchaseCredits, isPurchasing } = useCredits();
   const { data: creditPlans, isLoading: isLoadingPlans } = useCreditPlans();

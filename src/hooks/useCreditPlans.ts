@@ -10,6 +10,7 @@ export interface CreditPlan {
   plan_type: string;
   recurrence: string | null;
   payment_link: string | null;
+  payment_method?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
