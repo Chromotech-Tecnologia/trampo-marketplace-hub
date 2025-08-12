@@ -23,6 +23,7 @@ export type Database = {
           is_active: boolean
           name: string
           payment_link: string | null
+          payment_method: string
           plan_type: string
           price: number
           recurrence: string | null
@@ -36,6 +37,7 @@ export type Database = {
           is_active?: boolean
           name: string
           payment_link?: string | null
+          payment_method?: string
           plan_type: string
           price: number
           recurrence?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           payment_link?: string | null
+          payment_method?: string
           plan_type?: string
           price?: number
           recurrence?: string | null
@@ -65,9 +68,11 @@ export type Database = {
           created_at: string
           credits_amount: number
           id: string
+          payment_method: string
           payment_reference: string | null
           plan_id: string
           provider_id: string
+          provider_notes: string | null
           status: string
           updated_at: string
         }
@@ -79,9 +84,11 @@ export type Database = {
           created_at?: string
           credits_amount: number
           id?: string
+          payment_method?: string
           payment_reference?: string | null
           plan_id: string
           provider_id: string
+          provider_notes?: string | null
           status?: string
           updated_at?: string
         }
@@ -93,9 +100,11 @@ export type Database = {
           created_at?: string
           credits_amount?: number
           id?: string
+          payment_method?: string
           payment_reference?: string | null
           plan_id?: string
           provider_id?: string
+          provider_notes?: string | null
           status?: string
           updated_at?: string
         }
