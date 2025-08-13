@@ -65,6 +65,10 @@ export type Database = {
           amount: number
           approved_at: string | null
           approved_by: string | null
+          buyer_cpf: string | null
+          buyer_email: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
           created_at: string
           credits_amount: number
           id: string
@@ -81,6 +85,10 @@ export type Database = {
           amount: number
           approved_at?: string | null
           approved_by?: string | null
+          buyer_cpf?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           created_at?: string
           credits_amount: number
           id?: string
@@ -97,6 +105,10 @@ export type Database = {
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
+          buyer_cpf?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           created_at?: string
           credits_amount?: number
           id?: string

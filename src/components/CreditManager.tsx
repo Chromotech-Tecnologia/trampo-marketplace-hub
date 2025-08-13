@@ -12,6 +12,7 @@ import { formatBRL } from '@/lib/utils';
 export const CreditManager = () => {
   const { credits, transactions, isLoadingCredits, purchaseCredits, isPurchasing } = useCredits();
   const { data: creditPlans, isLoading: isLoadingPlans } = useCreditPlans();
+  const { pendingPurchase, isLoadingPending, createPurchase, isCreating, purchases, isLoadingPurchases } = usePurchases();
 
   if (isLoadingCredits || isLoadingPlans) {
     return (
@@ -52,6 +53,15 @@ export const CreditManager = () => {
           </div>
         </CardContent>
       </Card>
+
+      {pendingPurchase && (
+        <Alert>
+          <AlertTitle>Compra pendente em análise</AlertTitle>
+          <AlertDescription>
+            Assim que o pagamento for confirmado e aprovado, seus créditos serão liberados. Você não pode criar outra compra enquanto esta estiver pendente.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Purchase Packages */}
       <Card>
@@ -95,16 +105,18 @@ export const CreditManager = () => {
                     </p>
                     <Button
                       onClick={() => {
-                        if (plan.payment_link) {
-                          window.open(plan.payment_link, '_blank');
-                        }
+                        if (!plan.payment_link) return;
+                        createPurchase(
+                          { plan },
+                          { onSuccess: () => window.open(plan.payment_link!, '_blank') }
+                        );
                       }}
-                      disabled={isPurchasing || !plan.payment_link}
+                      disabled={isPurchasing || isCreating || !!pendingPurchase || !plan.payment_link}
                       className="w-full"
                       variant={index === 1 ? 'default' : 'outline'}
                     >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      {isPurchasing ? 'Processando...' : 'Comprar'}
+                      {isCreating ? 'Processando...' : 'Comprar'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -161,6 +173,48 @@ export const CreditManager = () => {
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(transaction.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                     </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Purchase History (includes pending) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Histórico de Compras
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingPurchases ? (
+            <p className="text-center text-muted-foreground py-8">Carregando...</p>
+          ) : !purchases || purchases.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Nenhuma compra encontrada.</p>
+          ) : (
+            <div className="space-y-3">
+              {purchases.map((purchase: any) => (
+                <div key={purchase.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{purchase.credits_amount} créditos</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(purchase.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{formatBRL(Number(purchase.amount) / 100)}</p>
+                    <div className="mt-1">
+                      {purchase.status === 'pending' ? (
+                        <Badge variant="secondary">Pendente</Badge>
+                      ) : purchase.status === 'approved' ? (
+                        <Badge variant="default">Aprovada</Badge>
+                      ) : (
+                        <Badge variant="destructive">Rejeitada</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

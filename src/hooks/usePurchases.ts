@@ -28,9 +28,32 @@ export const usePurchases = () => {
     enabled: !!user,
   });
 
+  // Fetch all purchases for this provider (includes pending)
+  const { data: purchases, isLoading: isLoadingPurchases } = useQuery({
+    queryKey: ['my-purchases', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('credit_purchases')
+        .select('*')
+        .eq('provider_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const createPurchase = useMutation({
     mutationFn: async ({ plan, notes }: { plan: CreditPlan; notes?: string }) => {
       if (!user) throw new Error('Usuário não autenticado');
+
+      // Fetch provider profile to capture buyer details
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, phone')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       const { data, error } = await supabase
         .from('credit_purchases')
@@ -42,6 +65,9 @@ export const usePurchases = () => {
           status: 'pending',
           payment_method: (plan as any).payment_method || 'pix',
           provider_notes: notes || null,
+          buyer_name: profile?.name || null,
+          buyer_phone: profile?.phone || null,
+          buyer_email: user.email || null,
         })
         .select('*')
         .single();
@@ -52,6 +78,7 @@ export const usePurchases = () => {
     onSuccess: (purchase) => {
       queryClient.invalidateQueries({ queryKey: ['pending-purchase'] });
       queryClient.invalidateQueries({ queryKey: ['admin-purchases'] });
+      queryClient.invalidateQueries({ queryKey: ['my-purchases'] });
       const method = (purchase as any).payment_method || 'pix';
       toast({
         title: 'Compra criada e em análise',
@@ -72,6 +99,8 @@ export const usePurchases = () => {
   return {
     pendingPurchase,
     isLoadingPending,
+    purchases,
+    isLoadingPurchases,
     createPurchase: createPurchase.mutate,
     isCreating: createPurchase.isPending,
   };

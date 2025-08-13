@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBRL } from '@/lib/utils';
 
 interface Purchase {
   id: string;
@@ -23,6 +25,11 @@ interface Purchase {
   approved_by: string | null;
   approved_at: string | null;
   created_at: string;
+  // Buyer details
+  buyer_name?: string | null;
+  buyer_email?: string | null;
+  buyer_phone?: string | null;
+  buyer_cpf?: string | null;
   // Join fields
   provider_name?: string;
   plan_name?: string;
@@ -31,8 +38,26 @@ interface Purchase {
 const AdminPurchases = () => {
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [buyerName, setBuyerName] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerCpf, setBuyerCpf] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const updatePurchaseMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const { error } = await supabase.from('credit_purchases').update(updates).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-purchases'] });
+      toast({ title: 'Alterações salvas.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao salvar alterações', description: error.message, variant: 'destructive' });
+    },
+  });
 
   const { data: purchases, isLoading } = useQuery({
     queryKey: ['admin-purchases'],
@@ -50,7 +75,7 @@ const AdminPurchases = () => {
       return data.map(purchase => ({
         ...purchase,
         plan_name: purchase.plan?.name || 'Plano não encontrado',
-        provider_name: 'Fornecedor'
+        provider_name: purchase.buyer_name || 'Fornecedor'
       })) as Purchase[];
     },
   });
@@ -208,6 +233,10 @@ const AdminPurchases = () => {
                         onClick={() => {
                           setSelectedPurchase(purchase);
                           setAdminNotes(purchase.admin_notes || '');
+                          setBuyerName(purchase.buyer_name || '');
+                          setBuyerEmail(purchase.buyer_email || '');
+                          setBuyerPhone(purchase.buyer_phone || '');
+                          setBuyerCpf(purchase.buyer_cpf || '');
                         }}
                       >
                         <Eye className="w-3 h-3 mr-2" />
@@ -238,6 +267,28 @@ const AdminPurchases = () => {
                           </div>
                         </div>
                         
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Dados do comprador</label>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs mb-1">Nome</label>
+                              <Input value={buyerName} onChange={(e) => setBuyerName(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="block text-xs mb-1">Email</label>
+                              <Input value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="block text-xs mb-1">Telefone</label>
+                              <Input value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="block text-xs mb-1">CPF</label>
+                              <Input value={buyerCpf} onChange={(e) => setBuyerCpf(e.target.value)} />
+                            </div>
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium mb-2">
                             Observações do Administrador:
